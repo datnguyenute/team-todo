@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { createHash } from 'crypto';
+import type { StringValue } from 'ms';
 import * as argon2 from 'argon2';
 import { UsersService } from '../users/users.service';
 import { RefreshToken } from './entities/refresh-token.entity';
@@ -128,7 +129,10 @@ export class AuthService {
 
   async logout(token: string): Promise<void> {
     const hash = createHash('sha256').update(token).digest('hex');
-    await this.refreshTokenRepo.update({ tokenHash: hash }, { revokedAt: new Date() });
+    await this.refreshTokenRepo.update(
+      { tokenHash: hash },
+      { revokedAt: new Date() },
+    );
   }
 
   private async issueTokens(user: User) {
@@ -136,10 +140,12 @@ export class AuthService {
 
     const accessToken = this.jwtService.sign(payload, {
       secret: this.config.getOrThrow<string>('JWT_ACCESS_SECRET'),
-      expiresIn: this.config.get<string>('JWT_ACCESS_EXPIRES_IN') ?? '15m',
+      expiresIn: (this.config.get<string>('JWT_ACCESS_EXPIRES_IN') ??
+        '15m') as StringValue,
     });
 
-    const refreshTtl = this.config.get<string>('JWT_REFRESH_EXPIRES_IN') ?? '7d';
+    const refreshTtl = (this.config.get<string>('JWT_REFRESH_EXPIRES_IN') ??
+      '7d') as StringValue;
     const refreshToken = this.jwtService.sign(
       { ...payload, type: 'refresh' },
       {
