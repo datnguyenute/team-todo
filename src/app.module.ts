@@ -3,8 +3,13 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-// import { AuthModule } from './auth/auth.module';
-// import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { WorkspacesModule } from './workspaces/workspaces.module';
+import { ProjectsModule } from './projects/projects.module';
+import { TasksModule } from './tasks/tasks.module';
+import { CommentsModule } from './comments/comments.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -17,14 +22,16 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         username: config.get('DATABASE_USER'),
         password: config.get('DATABASE_PASSWORD'),
         database: config.get('DATABASE_NAME'),
-
         autoLoadEntities: true,
-
         synchronize: config.get('NODE_ENV') !== 'production',
       }),
-      // AuthModule,
-      // UsersModule,
     }),
+    AuthModule,
+    UsersModule,
+    WorkspacesModule,
+    ProjectsModule,
+    TasksModule,
+    CommentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
